@@ -2,7 +2,9 @@ let btn = document.querySelector("button");
 let input = document.querySelector("input");
 let message = document.getElementById("message");
 let city = document.getElementById("name");
+let theLocaltime = document.getElementById("localtime");
 let myMain = document.getElementById("main");
+let image = document.querySelector("img");
 let theCountry = document.getElementById("country");
 btn.addEventListener("click", getWeather);
 
@@ -12,36 +14,39 @@ function getWeather(e) {
 
   if (value === "") {
     theCountry.textContent = "Enter valid City or town";
+    city.textContent = "";
+    theLocaltime.textContent = "";
+    message.textContent = "";
+    myMain.textContent = "";
+    image.src = "";
   } else {
-    fetch(
-      `https://community-open-weather-map.p.rapidapi.com/find?q=${value}&cnt=1&mode=null&lon=0&type=link%2C%20accurate&lat=0&units=imperial%2C%20metric`,
-      {
-        method: "GET",
-        headers: {
-          "x-rapidapi-key":
-            "9c5aef89bemsh83112047e4398a9p1faef8jsn9d1ff4189521",
-          "x-rapidapi-host": "community-open-weather-map.p.rapidapi.com",
-        },
-      }
-    )
-      .then((res) => res.json())
+    fetch(`https://weatherapi-com.p.rapidapi.com/current.json?q=${value}`, {
+      method: "GET",
+      headers: {
+        "x-rapidapi-key": "9c5aef89bemsh83112047e4398a9p1faef8jsn9d1ff4189521",
+        "x-rapidapi-host": "weatherapi-com.p.rapidapi.com",
+      },
+    })
+      .then((response) => response.json())
       .then((data) => {
-        let list = data.list;
-        list.map((item) => {
-          const { name, weather, sys } = item;
-          city.textContent = "city: " + name;
-          theCountry.textContent = `country: ${sys.country}`;
-          let myWeather = weather;
-          myWeather.map((ele) => {
-            const { description, main } = ele;
-            message.textContent = `description: ${description}`;
-            myMain.textContent = `Mainly: ${main}`;
-            // console.log(description, main);
-          });
-        });
+        const { location, current } = data;
+        const { country, localtime, name, region, tz_id } = location;
+        let conditions = current.condition;
+        const { text, icon } = conditions;
+        city.textContent = `City: ${name}`;
+        theCountry.textContent = `Country: ${country}`;
+        theLocaltime.textContent = `LocalTime: ${localtime}`;
+        message.textContent = text;
+        myMain.textContent = `Temp: ${current.temp_c}`;
+        image.src = icon;
       })
       .catch((err) => {
-        console.error(err);
+        theCountry.textContent = "No matching location found";
+        city.textContent = "";
+        theLocaltime.textContent = "";
+        message.textContent = "";
+        myMain.textContent = "";
+        image.src = "";
       });
   }
 
